@@ -14,8 +14,91 @@ datasource db {
 }
 
 model User {
-  id       Int    @id @default(autoincrement())
-  email    String @unique @db.VarChar(120)
-  password String @db.VarChar(255)
-  name     String @db.VarChar(60)
+  id                Int                 @id @default(autoincrement())
+  email             String              @unique @db.VarChar(120)
+  password          String              @db.VarChar(255)
+  name              String              @db.VarChar(60)
+  role              UserRole
+  language          String              @db.VarChar(60)
+  lineConfiguration LineConfiguration[]
+  group             Group[]
+}
+
+enum UserRole {
+  Master
+  Individual
+}
+
+model Group {
+  id   Int    @id @default(autoincrement())
+  name String @db.VarChar(20)
+  user User[]
+}
+
+model Sport {
+  id                Int                 @id @default(autoincrement())
+  name              String              @db.VarChar(60)
+  LineConfiguration LineConfiguration[]
+}
+
+model Championship {
+  id                Int                 @id @default(autoincrement())
+  name              String              @db.VarChar(60)
+  LineConfiguration LineConfiguration[]
+}
+
+model Tournament {
+  id                Int                 @id @default(autoincrement())
+  name              String              @db.VarChar(60)
+  LineConfiguration LineConfiguration[]
+}
+
+model Theme {
+  id                Int                 @id @default(autoincrement())
+  name              String              @db.VarChar(20)
+  LineConfiguration LineConfiguration[]
+}
+
+model LineConfiguration {
+  id                           Int                           @id @default(autoincrement())
+  themeId                      Int
+  userId                       Int
+  name                         String                        @db.VarChar(60)
+  type                         LineConfigurationType
+  viewType                     LineConfigurationViewType
+  alternativeEquipmentCode     Boolean
+  timeZone                     String                        @db.VarChar(120)
+  lineConfigurationAdvertising LineConfigurationAdvertising?
+  lineConfigurationImage       LineConfigurationImage[]
+  tournament                   Tournament[]
+  sport                        Sport[]
+  championship                 Championship[]
+  theme                        Theme                         @relation(fields: [themeId], references: [id])
+  user                         User                          @relation(fields: [userId], references: [id])
+}
+
+enum LineConfigurationType {
+  Americana
+  Decimal
+}
+
+enum LineConfigurationViewType {
+  Horizontal
+  Vertical
+}
+
+model LineConfigurationAdvertising {
+  id                  Int               @id @default(autoincrement())
+  lineConfigurationId Int               @unique
+  showEvery           String            @db.VarChar(10)
+  path                String            @db.VarChar(120)
+  lineConfiguration   LineConfiguration @relation(fields: [lineConfigurationId], references: [id])
+}
+
+model LineConfigurationImage {
+  id                  Int               @id @default(autoincrement())
+  lineConfigurationId Int
+  name                String            @db.VarChar(10)
+  path                String            @db.VarChar(120)
+  lineConfiguration   LineConfiguration @relation(fields: [lineConfigurationId], references: [id])
 }
