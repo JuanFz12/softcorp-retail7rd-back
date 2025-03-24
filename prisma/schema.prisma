@@ -19,9 +19,18 @@ model User {
   password          String              @db.VarChar(255)
   name              String              @db.VarChar(60)
   role              UserRole
+  screens           AvailableScreens[]
   language          String              @db.VarChar(60)
   lineConfiguration LineConfiguration[]
   group             Group[]
+}
+
+enum AvailableScreens {
+  Dashboard
+  LinesConfiguration
+  Users
+  Settings
+  Groups
 }
 
 enum UserRole {
@@ -30,9 +39,10 @@ enum UserRole {
 }
 
 model Group {
-  id   Int    @id @default(autoincrement())
-  name String @db.VarChar(20)
-  user User[]
+  id                Int                 @id @default(autoincrement())
+  name              String              @db.VarChar(20)
+  user              User[]
+  lineConfiguration LineConfiguration[]
 }
 
 model Sport {
@@ -73,6 +83,7 @@ model LineConfiguration {
   tournament                   Tournament[]
   sport                        Sport[]
   championship                 Championship[]
+  group                        Group[]
   theme                        Theme                         @relation(fields: [themeId], references: [id])
   user                         User                          @relation(fields: [userId], references: [id])
 }

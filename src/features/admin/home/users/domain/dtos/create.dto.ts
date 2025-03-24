@@ -1,4 +1,4 @@
-import { UserRole } from "@prisma/client";
+import { AvailableScreens, UserRole } from "@prisma/client";
 import { RegularExpressions } from "../../../../../../config";
 
 interface Attributes {
@@ -7,6 +7,8 @@ interface Attributes {
     password: string;
     role: UserRole;
     language: string;
+    screens: AvailableScreens[];
+    groups: number[];
 }
 export class CreateUserDto {
     private constructor(
@@ -16,18 +18,21 @@ export class CreateUserDto {
         return this.attributes;
     }
     static create(obj: { [key: string]: any }): [string[] | string | undefined, CreateUserDto?] {
-        const allowedProperties = ["name", "email", "password", "role", "language"];
+        const allowedProperties: string[] = ["name", "email", "password", "role", "language", "screens", "groups"];
         const extraProperties = this.validateExtraProperties(allowedProperties, obj);
         const errorsProperties: string[] = [];
         const errorsPropertiesTypes: string[] = [];
+        const errors: string[] = [];
+
         if (extraProperties.length > 0) {
             return [`Extra properties detected: ${extraProperties.join(', ')}`];
         }
-        const { name, email, password, role, language } = obj
+        const { name, email, password, role, language, screens, groups } = obj
         if (!name) errorsProperties.push('Missing name');
         if (!email) errorsProperties.push('Missing email');
         if (!password) errorsProperties.push('Missing password');
         if (!role) errorsProperties.push('Missing role');
+        if (groups === undefined || groups.length < 1) errorsProperties.push('Missing groups');
         if (!language) errorsProperties.push('Missing language');
         if (errorsProperties.length > 0) {
             return [errorsProperties];
@@ -42,13 +47,46 @@ export class CreateUserDto {
         if (errorsPropertiesTypes.length > 0) {
             return [errorsPropertiesTypes];
         }
+        //*Screens Validation
+        let validatedScreens: AvailableScreens[] = [];
+
+        if (role === UserRole.Master) {
+            validatedScreens = Object.values(AvailableScreens) as AvailableScreens[];
+        } else {
+            if (!Array.isArray(screens) || screens === undefined) {
+                errors.push("The 'screens' property is required and must be an array");
+            } else if (screens.length < 1) {
+                errors.push('The property "screens" cannot be empty')
+            } else if (!screens.every((s) => this.validateEnum(s, AvailableScreens))) {
+                errors.push(`'screens' contains invalid values. ${Object.values(AvailableScreens).join(', ')}`);
+            } else {
+                validatedScreens = screens;
+            }
+        }
+        //*Groups Validation
+        let validatedGroups: number[] = [];
+
+        if (!validatedScreens.includes(AvailableScreens.LinesConfiguration)) {
+            validatedGroups = [];
+        } else {
+            if (!Array.isArray(groups)) {
+                errors.push("'groups' must be an array");
+            } else if (!groups.every((g) => typeof g === 'number' && g > 0)) {
+                errors.push("'groups' must be an array of positive numbers");
+            } else {
+                validatedGroups = groups;
+            }
+        }
+        if (errors.length > 0) return [errors];
 
         const attributes: Attributes = {
             name: name.trim(),
             email: email.trim(),
             password: password.trim(),
             role,
-            language: language.trim()
+            language: language.trim(),
+            screens: validatedScreens,
+            groups: validatedGroups
         }
         return [undefined, new CreateUserDto(attributes)]
     }

@@ -1,5 +1,5 @@
 import { BcryptPlugin, prisma } from "../../../../../../config";
-import { ServerResponseEntity } from "../../../../shared";
+import { CustomError, ServerResponseEntity } from "../../../../shared";
 import { CreateUserDto, FindUsersDto, UpdateUserDto, UserManagementDataSource } from "../../domain";
 
 export class UserManagementDataSourceImpl implements UserManagementDataSource<FindUsersDto, number, CreateUserDto, UpdateUserDto, number> {
@@ -30,11 +30,13 @@ export class UserManagementDataSourceImpl implements UserManagementDataSource<Fi
     async create({ attributesDto }: CreateUserDto): Promise<ServerResponseEntity> {
         try {
             const { email, language, name, password, role } = attributesDto
+          /*   const hasUser = await prisma.user.findUnique({ where: { email } });
+            if (hasUser) throw CustomError.Conflict(`User with email ${email} already exist`);
             await prisma.$transaction(async (prismaCLI) => {
                 await prismaCLI.user.create({
                     data: { email, language, name, password: BcryptPlugin.hash(password), role }
                 })
-            });
+            }); */
             return ServerResponseEntity.fromObject({
                 status: "success",
                 message: "",

@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { LinesConfigurationRoutes, UsersRoutes } from '../features';
+import { GroupsRoutes, LinesConfigurationRoutes, UsersRoutes } from '../features';
 
 
 
@@ -16,6 +16,7 @@ export class AppRoutes {
     //*Admin Routes
     router.use('/api/admin/lines-configuration', LinesConfigurationRoutes.routes);
     router.use('/api/admin/users', UsersRoutes.routes);
+    router.use('/api/admin/groups', GroupsRoutes.routes);
     return router;
   }
 

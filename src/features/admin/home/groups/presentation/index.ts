@@ -1,0 +1,1 @@
+export { GroupsRoutes } from './routes.module'
