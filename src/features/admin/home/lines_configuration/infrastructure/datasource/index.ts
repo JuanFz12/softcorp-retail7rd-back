@@ -1,3 +1,4 @@
+import { prisma } from "../../../../../../config";
 import { ServerResponseEntity } from "../../../../shared";
 import { LinesConfigurationDataSource, CreateLineConfigurationDto, FindLinesConfigurationDto, UpdateLineConfigurationDto, DeleteLineConfigurationDto } from "../../domain";
 
@@ -28,10 +29,22 @@ export class LinesConfigurationDataSourceImpl implements LinesConfigurationDataS
     }
     async create({ attributesDto }: CreateLineConfigurationDto): Promise<ServerResponseEntity> {
         try {
+            const { advertisingImage, images, ...restDto } = attributesDto;
+            const { alternativeEquipmentCode, name, lineType, timeZone, viewType, themeId, userId, showAdvertisingEvery } = attributesDto;
+            await prisma.$transaction(async (prismaCLI) => {
+                const newLineConfiguration = await prismaCLI.lineConfiguration.create({ data: { alternativeEquipmentCode, name, timeZone, type: lineType, viewType, themeId, userId } })
+                await prisma.lineConfigurationAdvertising.create({ data: { lineConfigurationId: newLineConfiguration.id, showEvery: showAdvertisingEvery, path: '' } })
+                const data = [
+                    {
+                        path: '', name: '', lineConfigurationId: newLineConfiguration.id
+                    }
+                ];
+                await prisma.lineConfigurationImage.createMany({ data })
+            })
             return ServerResponseEntity.fromObject({
                 status: "success",
                 message: "",
-                data: {...attributesDto},
+                data: { ...restDto, advertisingImage: advertisingImage.name, images: images.map(image => image.name) },
                 error: null
             })
         } catch (error) {

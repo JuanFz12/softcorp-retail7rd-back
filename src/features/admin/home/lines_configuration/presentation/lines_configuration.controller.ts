@@ -20,7 +20,29 @@ export class LinesConfigurationController {
     }
 
     create = (req: Request, res: Response) => {
-        const [error, createLineConfigurationDto] = CreateLineConfigurationDto.create({...req.body})
+        const parseBoolean = (value: any) => value === "true";
+        const parseArrayNumbers = (value: any): number[] => {
+            try {
+                return JSON.parse(value).map((item: any) => Number(item)).filter((n: any) => !isNaN(n));
+            } catch {
+                return [];
+            }
+        };
+
+        const { files, ...restBody } = req.body;
+        const [error, createLineConfigurationDto] = CreateLineConfigurationDto.create({
+            ...restBody,
+            alternativeEquipmentCode: parseBoolean(restBody.alternativeEquipmentCode),
+            tournamentIds: parseArrayNumbers(restBody.tournamentIds),
+            sportIds: parseArrayNumbers(restBody.sportIds),
+            championshipIds: parseArrayNumbers(restBody.championshipIds),
+            groupIds: parseArrayNumbers(restBody.groupIds),
+            advertisingImage: files.advertisingImage,
+            images: [
+                { name: 'MLB', file: files.MLB },
+                { name: 'NHL', file: files.NHL }
+            ]
+        })
         if (error) {
             res.status(400).json(ServerResponseEntity.fromObject({
                 status: 'error',
