@@ -1,6 +1,6 @@
 import { Request, Response } from "express"
 import { CustomError, ServerResponseEntity } from "../../../shared"
-import { CreateLineConfigurationDto, CreateLineConfigurationUseCase, DeleteLineConfigurationDto, FindLinesConfigurationDto, LinesConfigurationRepository, UpdateLineConfigurationDto } from "../domain"
+import { CreateLineConfigurationDto, CreateLineConfigurationUseCase, DeleteLineConfigurationDto, FindLinesConfigurationDto, FindLinesConfigurationUseCase, LinesConfigurationRepository, UpdateLineConfigurationDto } from "../domain"
 
 export class LinesConfigurationController {
     constructor(
@@ -29,14 +29,14 @@ export class LinesConfigurationController {
             }
         };
 
-        const { files, ...restBody } = req.body;
+        const { user, files, ...restBody } = req.body;
         const [error, createLineConfigurationDto] = CreateLineConfigurationDto.create({
             ...restBody,
+            userId: user.id,
             alternativeEquipmentCode: parseBoolean(restBody.alternativeEquipmentCode),
             tournamentIds: parseArrayNumbers(restBody.tournamentIds),
             sportIds: parseArrayNumbers(restBody.sportIds),
             championshipIds: parseArrayNumbers(restBody.championshipIds),
-            groupIds: parseArrayNumbers(restBody.groupIds),
             advertisingImage: files.advertisingImage,
             images: [
                 { name: 'MLB', file: files.MLB },
@@ -54,6 +54,23 @@ export class LinesConfigurationController {
         }
         new CreateLineConfigurationUseCase(this.repository)
             .execute(createLineConfigurationDto!)
+            .then(response => res.json(response))
+            .catch(error => this.handleError(res, error))
+    }
+    find = (req: Request, res: Response) => {
+        const { limit = 10, page = 1 } = req.query;
+        const [error, findLinesConfigurationDto] = FindLinesConfigurationDto.create({ limit, page })
+        if (error) {
+            res.status(400).json(ServerResponseEntity.fromObject({
+                status: 'error',
+                message: 'An error occurred while processing the request.',
+                data: null,
+                error: error
+            }));
+            return
+        }
+        new FindLinesConfigurationUseCase(this.repository)
+            .execute(findLinesConfigurationDto!)
             .then(response => res.json(response))
             .catch(error => this.handleError(res, error))
     }

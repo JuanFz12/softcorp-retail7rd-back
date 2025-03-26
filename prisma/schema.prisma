@@ -78,6 +78,8 @@ model LineConfiguration {
   viewType                     LineConfigurationViewType
   alternativeEquipmentCode     Boolean
   timeZone                     String                        @db.VarChar(120)
+  createdAt                    DateTime                      @default(now())
+  isActive                     Boolean                       @default(true)
   lineConfigurationAdvertising LineConfigurationAdvertising?
   lineConfigurationImage       LineConfigurationImage[]
   tournament                   Tournament[]

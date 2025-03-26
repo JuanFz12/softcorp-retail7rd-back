@@ -3,7 +3,12 @@ import { CustomError } from "../../domain"
 import fs from 'node:fs'
 import path from 'node:path'
 import { UuidPlugin } from "../../../../../config"
-export class FileUploadService {
+export interface FileUploadServiceInterface {
+    uploadSingle(file: UploadedFile, folder?: string, validExtensions?: string[]): Promise<{ fileName: string }>;
+    uploadMultiple(files: UploadedFile[], folder?: string, validExtensions?: string[]): Promise<{ fileName: string }[]>;
+    deleteFile(fileName: string, folder: string): Promise<void>;
+}
+export class FileUploadService implements FileUploadServiceInterface {
     constructor(private readonly uuid = UuidPlugin.v4) { }
     private checkFolder(folderPath: string) {
         if (!fs.existsSync(folderPath)) {

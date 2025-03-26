@@ -11,7 +11,6 @@ interface Attributes {
     tournamentIds: number[];
     sportIds: number[];
     championshipIds: number[];
-    groupIds: number[];
     showAdvertisingEvery: string;
     advertisingImage: UploadedFile;
     images: { name: string; file: UploadedFile }[];
@@ -24,13 +23,13 @@ export class CreateLineConfigurationDto {
         return this.attributes;
     }
     static create(obj: { [key: string]: any }): [string[] | string | undefined, CreateLineConfigurationDto?] {
-        const allowedProperties: string[] = ["name", "lineType", "userId", "images", "themeId", "viewType", "advertisingImage", "showAdvertisingEvery", "alternativeEquipmentCode", "timeZone", "tournamentIds", "sportIds", "championshipIds", "groupIds",];
+        const allowedProperties: string[] = ["name", "lineType", "userId", "images", "themeId", "viewType", "advertisingImage", "showAdvertisingEvery", "alternativeEquipmentCode", "timeZone", "tournamentIds", "sportIds", "championshipIds"];
         const extraProperties = this.validateExtraProperties(allowedProperties, obj);
         if (extraProperties.length > 0) {
             return [`Extra properties detected: ${extraProperties.join(', ')}`];
         }
         const errorsProperties: string[] = [];
-        const { name, lineType, themeId, viewType, alternativeEquipmentCode, timeZone, userId, images, tournamentIds, advertisingImage, sportIds, championshipIds, groupIds, showAdvertisingEvery } = obj;
+        const { name, lineType, themeId, viewType, alternativeEquipmentCode, timeZone, userId, images, tournamentIds, advertisingImage, sportIds, championshipIds, showAdvertisingEvery } = obj;
         if (!name) errorsProperties.push("Missing 'name' property");
         if (!timeZone) errorsProperties.push("Missing 'timeZone' property");
         if (!lineType) errorsProperties.push("Missing 'lineType' property");
@@ -42,7 +41,6 @@ export class CreateLineConfigurationDto {
         if (sportIds === undefined) errorsProperties.push("Missing 'sportIds' property");
         if (championshipIds === undefined) errorsProperties.push("Missing 'championshipIds' property");
         if (advertisingImage === undefined) errorsProperties.push("Missing 'advertisingImage' property");
-        if (groupIds === undefined) errorsProperties.push("Missing 'groupIds' property");
         if (alternativeEquipmentCode === undefined) errorsProperties.push("Missing 'alternativeEquipmentCode' property");
         if (!viewType) errorsProperties.push("Missing 'viewType' property");
         if (errorsProperties.length > 0) {
@@ -62,7 +60,7 @@ export class CreateLineConfigurationDto {
         if (!this.validateEnum(viewType, LineConfigurationViewType)) {
             errorsPropertiesTypes.push(`'viewType' must be a valid value: ${Object.values(LineConfigurationViewType).join(', ')}`);
         }
-        const arrayFields = ["tournamentIds", "sportIds", "championshipIds", "groupIds"];
+        const arrayFields = ["tournamentIds", "sportIds", "championshipIds"];
 
         for (const field of arrayFields) {
             const error = this.validateNumberArray(field, obj[field]);
@@ -89,7 +87,6 @@ export class CreateLineConfigurationDto {
             sportIds,
             championshipIds,
             images,
-            groupIds,
             showAdvertisingEvery: showAdvertisingEvery.trim()
         }
         return [undefined, new CreateLineConfigurationDto(attributes)]

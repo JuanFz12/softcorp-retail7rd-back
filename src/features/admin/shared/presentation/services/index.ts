@@ -1,1 +1,1 @@
-export { FileUploadService } from "./file-upload.service";
+export { FileUploadService, FileUploadServiceInterface } from "./file-upload.service";
