@@ -8,7 +8,7 @@ interface Attributes {
     role: UserRole;
     language: string;
     screens: AvailableScreens[];
-    groups: number[];
+    groupIds: number[];
 }
 export class CreateUserDto {
     private constructor(
@@ -18,7 +18,7 @@ export class CreateUserDto {
         return this.attributes;
     }
     static create(obj: { [key: string]: any }): [string[] | string | undefined, CreateUserDto?] {
-        const allowedProperties: string[] = ["name", "email", "password", "role", "language", "screens", "groups"];
+        const allowedProperties: string[] = ["name", "email", "password", "role", "language", "screens", "groupIds"];
         const extraProperties = this.validateExtraProperties(allowedProperties, obj);
         const errorsProperties: string[] = [];
         const errorsPropertiesTypes: string[] = [];
@@ -27,12 +27,12 @@ export class CreateUserDto {
         if (extraProperties.length > 0) {
             return [`Extra properties detected: ${extraProperties.join(', ')}`];
         }
-        const { name, email, password, role, language, screens, groups } = obj
+        const { name, email, password, role, language, screens, groupIds } = obj
         if (!name) errorsProperties.push('Missing name');
         if (!email) errorsProperties.push('Missing email');
         if (!password) errorsProperties.push('Missing password');
         if (!role) errorsProperties.push('Missing role');
-        if (groups === undefined || groups.length < 1) errorsProperties.push('Missing groups');
+        if (groupIds === undefined || groupIds.length < 1) errorsProperties.push('Missing groupIds');
         if (!language) errorsProperties.push('Missing language');
         if (errorsProperties.length > 0) {
             return [errorsProperties];
@@ -69,12 +69,12 @@ export class CreateUserDto {
         if (!validatedScreens.includes(AvailableScreens.LinesConfiguration)) {
             validatedGroups = [];
         } else {
-            if (!Array.isArray(groups)) {
-                errors.push("'groups' must be an array");
-            } else if (!groups.every((g) => typeof g === 'number' && g > 0)) {
-                errors.push("'groups' must be an array of positive numbers");
+            if (!Array.isArray(groupIds)) {
+                errors.push("'groupIds' must be an array");
+            } else if (!groupIds.every((g) => typeof g === 'number' && g > 0)) {
+                errors.push("'groupIds' must be an array of positive numbers");
             } else {
-                validatedGroups = groups;
+                validatedGroups = groupIds;
             }
         }
         if (errors.length > 0) return [errors];
@@ -86,7 +86,7 @@ export class CreateUserDto {
             role,
             language: language.trim(),
             screens: validatedScreens,
-            groups: validatedGroups
+            groupIds: validatedGroups
         }
         return [undefined, new CreateUserDto(attributes)]
     }

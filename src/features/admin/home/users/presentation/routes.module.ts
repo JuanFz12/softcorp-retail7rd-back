@@ -9,6 +9,7 @@ export class UsersRoutes {
         const repository = new UserManagementRepositoryImpl(datasource);
         const controller = new UsersController(repository);
         router.post('/', controller.create)
+        router.get('/', controller.find)
         return router;
     }
 }

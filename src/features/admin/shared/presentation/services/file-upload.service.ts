@@ -28,7 +28,7 @@ export class FileUploadService implements FileUploadServiceInterface {
                     `Invalid extension: ${fileExtension},valid ones ${validExtensions}`
                 )
             }
-            const destination = path.resolve(__dirname, '../../../../', folder)
+            const destination = path.resolve(__dirname, '../../../../../../', folder)
             this.checkFolder(destination)
             const fileName = `${this.uuid()}.${fileExtension}`
             void file?.mv(`${destination}/${fileName}`)
@@ -61,7 +61,7 @@ export class FileUploadService implements FileUploadServiceInterface {
     }
     public async deleteFile(fileName: string, folder: string = 'uploads'): Promise<void> {
         try {
-            const filePath = path.resolve(__dirname, '../../../../', folder, fileName);
+            const filePath = path.resolve(__dirname, '../../../../../../', folder, fileName);
 
             if (!fs.existsSync(filePath)) {
                 return;

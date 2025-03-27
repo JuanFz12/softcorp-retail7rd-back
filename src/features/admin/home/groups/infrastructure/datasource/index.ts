@@ -13,7 +13,7 @@ export class GroupsManagementDataSourceImpl implements GroupsManagementDataSourc
             });
             const totalGroupsCount = await prisma.group.count();
             const totalPages = Math.ceil(totalGroupsCount / pagination.limit);
-            const groupsToEntity = groups.map(({ id, name, lineConfiguration }) => Group.fromObject({ id, name, lineConfiguration: lineConfiguration.length }).attributesDto)
+            const groupsToEntity = groups.map(({ id, name, lineConfiguration }) => Group.fromObject({ id, name, linesConfiguration: lineConfiguration.length }).attributesDto)
             return ServerResponseEntity.fromObject({
                 status: "success",
                 message: "",
@@ -47,7 +47,7 @@ export class GroupsManagementDataSourceImpl implements GroupsManagementDataSourc
         try {
             const { linesConfigurationIds, name } = attributesDto;
             await Promise.all(
-                linesConfigurationIds.map((id) => this.findOneGroupById(id))
+                linesConfigurationIds.map((id) => this.findOneLineConfigurationById(id))
             );
             const newGroup = await prisma.group.create({ data: { name, lineConfiguration: { connect: linesConfigurationIds.map(id => ({ id })) } } })
             return ServerResponseEntity.fromObject({
@@ -95,6 +95,15 @@ export class GroupsManagementDataSourceImpl implements GroupsManagementDataSourc
             const group = await prisma.group.findUnique({ where: { id } });
             if (!group) throw CustomError.notFound('Group not found');
             return group;
+        } catch (error) {
+            throw error
+        }
+    }
+    async findOneLineConfigurationById(id: number) {
+        try {
+            const lineConfiguration = await prisma.lineConfiguration.findUnique({ where: { id } });
+            if (!lineConfiguration) throw CustomError.notFound('Line Configuration not found');
+            return lineConfiguration;
         } catch (error) {
             throw error
         }

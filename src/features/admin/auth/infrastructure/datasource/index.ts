@@ -12,7 +12,8 @@ export class AuthDataSourceImpl implements AuthDataSource<LoginDto, string, stri
                 name: user.name,
                 id: user.id,
                 email: user.email,
-                role: user.role
+                role: user.role,
+                screens: user.screens
             }).userAttributes;
             return ServerResponseEntity.fromObject({
                 status: "success",
@@ -38,7 +39,8 @@ export class AuthDataSourceImpl implements AuthDataSource<LoginDto, string, stri
                 name: user.name,
                 id: user.id,
                 email: user.email,
-                role: user.role
+                role: user.role,
+                screens: user.screens
             }).userAttributes;
             return ServerResponseEntity.fromObject({
                 status: "success",

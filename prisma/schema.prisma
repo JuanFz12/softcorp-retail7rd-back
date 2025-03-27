@@ -20,6 +20,7 @@ model User {
   name              String              @db.VarChar(60)
   role              UserRole
   screens           AvailableScreens[]
+  isActive          Boolean             @default(true)
   language          String              @db.VarChar(60)
   lineConfiguration LineConfiguration[]
   group             Group[]

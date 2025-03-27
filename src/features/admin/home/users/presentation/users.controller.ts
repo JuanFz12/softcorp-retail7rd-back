@@ -1,6 +1,6 @@
 import { Request, Response } from "express"
 import { CustomError, ServerResponseEntity } from "../../../shared"
-import { CreateUserDto, CreateUserUseCase, FindUsersDto, UpdateUserDto, UserManagementRepository } from "../domain"
+import { CreateUserDto, CreateUserUseCase, FindUsersDto, FindUsersUseCase, UpdateUserDto, UserManagementRepository } from "../domain"
 
 export class UsersController {
     constructor(
@@ -31,6 +31,23 @@ export class UsersController {
         }
         new CreateUserUseCase(this.repository)
             .execute(createUserDto!)
+            .then(response => res.json(response))
+            .catch(error => this.handleError(res, error))
+    }
+    find = (req: Request, res: Response) => {
+        const { limit = 10, page = 1 } = req.query;
+        const [error, findUsersDto] = FindUsersDto.create({ limit, page })
+        if (error) {
+            res.status(400).json(ServerResponseEntity.fromObject({
+                status: 'error',
+                message: 'An error occurred while processing the request.',
+                data: null,
+                error: error
+            }));
+            return;
+        }
+        new FindUsersUseCase(this.repository)
+            .execute(findUsersDto!)
             .then(response => res.json(response))
             .catch(error => this.handleError(res, error))
     }

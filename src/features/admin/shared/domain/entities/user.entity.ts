@@ -1,4 +1,4 @@
-import { UserRole } from "@prisma/client";
+import { AvailableScreens, UserRole } from "@prisma/client";
 import { CustomError } from "./custom_error.entity";
 
 export interface UserAttributes {
@@ -6,6 +6,7 @@ export interface UserAttributes {
     email: string;
     name: string;
     role: UserRole;
+    screens: AvailableScreens[]
 }
 
 export class User {
@@ -16,18 +17,26 @@ export class User {
         return this.attributes;
     }
     static fromObject(object: { [key: string]: any }): User {
+        const { role, screens } = object;
         const id = this.validateProperty<number>(object, 'id', 'number');
         const email = this.validateProperty<string>(object, 'email', 'string');
         const name = this.validateProperty<string>(object, 'name', 'string');
-        const role = this.validateProperty<UserRole>(object, 'role', 'string');
+        if (!Array.isArray(screens)) throw CustomError.internalServer('screens must be array');
+        if (screens.length < 1) throw CustomError.internalServer('screens not empty');
         if (!this.validateEnum(role, UserRole)) {
             throw CustomError.internalServer(`'role' must be a valid value: ${Object.values(UserRole).join(', ')}`);
         }
+        screens.forEach(screen => {
+            if (!this.validateEnum(screen, AvailableScreens)) {
+                throw CustomError.internalServer(`'screen' must be a valid value: ${Object.values(AvailableScreens).join(', ')}`);
+            }
+        })
         const attributes: UserAttributes = {
             id: +id,
             email: email.trim(),
             name: name.trim(),
-            role
+            role,
+            screens
         }
         return new User(attributes);
     }
