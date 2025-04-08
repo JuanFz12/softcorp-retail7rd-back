@@ -5,10 +5,16 @@ import { GroupsManagementDataSource, CreateGroupDto, FindGroupsDto, UpdateGroupD
 export class GroupsManagementDataSourceImpl implements GroupsManagementDataSource<FindGroupsDto, number, CreateGroupDto, UpdateGroupDto, number> {
     async find({ attributesDto }: FindGroupsDto): Promise<ServerResponseEntity> {
         try {
-            const { pagination } = attributesDto
+            const { pagination, name } = attributesDto
             const groups = await prisma.group.findMany({
                 include: { lineConfiguration: true },
                 take: pagination.limit,
+                where: {
+                    name: {
+                        contains: name, 
+                        mode: 'insensitive',
+                    }
+                },
                 skip: (pagination.page - 1) * pagination.limit,
             });
             const totalGroupsCount = await prisma.group.count();

@@ -12,7 +12,6 @@ export class Group {
         return this.attributes;
     }
     static fromObject(object: Record<string, any>): Group {
-        console.log({object})
         const name = this.validateProperty<string>(object, 'name', "string")
         const linesConfiguration = this.validateProperty<number>(object, 'linesConfiguration', "number")
         const id = this.validateProperty<number>(object, 'id', "number")

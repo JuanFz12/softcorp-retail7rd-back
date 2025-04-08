@@ -21,7 +21,7 @@ export class FindGroupsDto {
         const errorsPropertiesTypes: string[] = [];
 
         if (name) {
-            if (typeof name !== 'string' || name.trim().length < 4) errorsPropertiesTypes.push("'name' must be a string and at least 4 characters long.");
+            if (typeof name !== 'string' || name.trim().length < 0) errorsPropertiesTypes.push("'name' must be a string and at least 4 characters long.");
         }
         if (errorsPropertiesTypes.length > 0) {
             return [errorsPropertiesTypes];

@@ -10,9 +10,15 @@ export class LinesConfigurationDataSourceImpl implements LinesConfigurationDataS
     ) { }
     async find({ attributesDto }: FindLinesConfigurationDto): Promise<ServerResponseEntity> {
         try {
-            const { pagination } = attributesDto;
+            const { pagination, name } = attributesDto;
             const linesConfiguration = await prisma.lineConfiguration.findMany({
                 include: { user: { select: { id: true, name: true } } },
+                where: {
+                    name: {
+                        contains: name,
+                        mode: 'insensitive',
+                    }
+                },
                 take: pagination.limit, skip: (pagination.page - 1) * pagination.limit,
             });
             const totalLinesConfigurationCount = await prisma.lineConfiguration.count();
@@ -52,7 +58,7 @@ export class LinesConfigurationDataSourceImpl implements LinesConfigurationDataS
     }
     async create({ attributesDto }: CreateLineConfigurationDto): Promise<ServerResponseEntity> {
         try {
-            const { alternativeEquipmentCode, name, lineType, timeZone, viewType, themeId, userId, showAdvertisingEvery, advertisingImage, images, championshipIds, sportIds, tournamentIds } = attributesDto;
+            const { alternativeEquipmentCode, name, lineType, timeZone, advertisingImages, headersImages, viewType, themeId, userId, championshipIds, sportIds, tournamentIds } = attributesDto;
             await this.sportService.findSportsByIds(sportIds);
             await this.sportService.findTournamentsByIds(tournamentIds);
             await this.sportService.findChampionShipsByIds(championshipIds);
@@ -72,19 +78,35 @@ export class LinesConfigurationDataSourceImpl implements LinesConfigurationDataS
                         userId
                     }, include: { user: { select: { id: true, name: true } } }
                 })
-                const { fileName } = await this.fileUploadService.uploadSingle(advertisingImage, 'uploads/lines_configuration/advertising_images');
-                await prismaCLI.lineConfigurationAdvertising.create({ data: { lineConfigurationId: newLineConfiguration.id, showEvery: showAdvertisingEvery, path: `lines_configuration/advertising_images/${fileName}` } })
-                const data = await Promise.all(images.map(async ({ file, name }) => {
-                    const { fileName } = await this.fileUploadService.uploadSingle(file, 'uploads/lines_configuration/images');
+                const advertisingData = await Promise.all(advertisingImages.map(async ({ file, seconds }) => {
+                    const { fileName } = await this.fileUploadService.uploadSingle(file, 'uploads/lines_configuration/headers');
                     return {
-                        name: name,
-                        path: `lines_configuration/images/${fileName}`,
+                        showEvery: seconds,
+                        path: `lines_configuration/headers/${fileName}`,
                         lineConfigurationId: newLineConfiguration.id,
                     };
                 }));
-                await prismaCLI.lineConfigurationImage.createMany({ data });
+                await prismaCLI.lineConfigurationAdvertising.createMany({ data: advertisingData });
+                await Promise.all(
+                    headersImages.map(async ({ file, tournamentId }) => {
+                        const { fileName } = await this.fileUploadService.uploadSingle(
+                            file,
+                            'uploads/lines_configuration/advertising'
+                        );
+                        await prismaCLI.lineConfigurationHeaders.create({
+                            data: {
+                                path: `lines_configuration/advertising/${fileName}`,
+                                lineConfigurationId: newLineConfiguration.id,
+                                tournament: {
+                                    connect: { id: tournamentId },
+                                },
+                            },
+                        });
+                    })
+                );
                 return newLineConfiguration;
             })
+
             return ServerResponseEntity.fromObject({
                 status: "success",
                 message: "",

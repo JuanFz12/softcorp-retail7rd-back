@@ -15,8 +15,21 @@ export interface SportServiceInterface {
     findSportsByIds(ids: number[]): Promise<SportAttributes[]>;
     findChampionShipsByIds(ids: number[]): Promise<ChampionShipAttributes[]>;
     findTournamentsByIds(ids: number[]): Promise<TournamentAttributes[]>;
+
+    //*All
+    findAllSportInformation(): Promise<{ sports: SportAttributes[]; championships: ChampionShipAttributes[]; tournaments: TournamentAttributes[] }>;
 }
 export class SportService implements SportServiceInterface {
+    async findAllSportInformation(): Promise<{ sports: SportAttributes[]; championships: ChampionShipAttributes[]; tournaments: TournamentAttributes[]; }> {
+        try {
+            const sports = await this.findSports();
+            const tournaments = await this.findTournament();
+            const championships = await this.findChampionShips();
+            return { sports, tournaments, championships };
+        } catch (error) {
+            throw error;
+        }
+    }
     async findSports(): Promise<SportAttributes[]> {
         try {
             const sports = await prisma.sport.findMany();

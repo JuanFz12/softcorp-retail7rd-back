@@ -1,6 +1,7 @@
 import express, { Router } from 'express';
 import fileUpload from 'express-fileupload';
 import path from 'path';
+import cors from 'cors'
 
 interface Options {
   port: number;
@@ -32,7 +33,7 @@ export class Server {
     //* Middlewares
     this.app.use(express.json()); // raw
     this.app.use(express.urlencoded({ extended: true })); // x-www-form-urlencoded
-
+    this.app.use(cors({ origin: '*' }));
     //*Files
     this.app.use(
       fileUpload({

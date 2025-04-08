@@ -35,8 +35,8 @@ export class GroupsController {
             .catch(error => this.handleError(res, error))
     }
     find = (req: Request, res: Response) => {
-        const { limit = 10, page = 1 } = req.query;
-        const [error, findGroupsDto] = FindGroupsDto.create({ limit, page });
+        const { limit = 10, page = 1, name } = req.query;
+        const [error, findGroupsDto] = FindGroupsDto.create({ limit, page, name });
         if (error) {
             res.status(400).json(ServerResponseEntity.fromObject({
                 status: 'error',

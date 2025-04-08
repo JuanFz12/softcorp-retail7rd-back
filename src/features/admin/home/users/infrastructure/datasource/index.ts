@@ -11,8 +11,8 @@ export class UserManagementDataSourceImpl implements UserManagementDataSource<Fi
                 skip: (pagination.page - 1) * pagination.limit,
                 include: { group: { include: { lineConfiguration: true } } }
             });
-            const totalLinesConfigurationCount = await prisma.lineConfiguration.count();
-            const totalPages = Math.ceil(totalLinesConfigurationCount / pagination.limit);
+            const totalUsersCount = await prisma.user.count();
+            const totalPages = Math.ceil(totalUsersCount / pagination.limit);
             const dataToEntity = users.map(user => {
                 const totalLineConfigurations = user.group.reduce((acc, group) => acc + group.lineConfiguration.length, 0);
                 return UserManagement.fromObject({

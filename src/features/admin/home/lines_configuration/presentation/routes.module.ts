@@ -12,7 +12,7 @@ export class LinesConfigurationRoutes {
         const datasource = new LinesConfigurationDataSourceImpl(fileUploadService, sportService);
         const repository = new LinesConfigurationRepositoryImpl(datasource);
         const controller = new LinesConfigurationController(repository);
-        router.post('/', [FileUploadMiddleware.keysContainFiles, AuthMiddleware.validateJwtUser], controller.create);
+        router.post('/', [AuthMiddleware.validateJwtUser], controller.create);
         router.get('/', [AuthMiddleware.validateJwtUser], controller.find);
         return router;
     }

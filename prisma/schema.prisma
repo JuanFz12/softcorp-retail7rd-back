@@ -59,9 +59,10 @@ model Championship {
 }
 
 model Tournament {
-  id                Int                 @id @default(autoincrement())
-  name              String              @db.VarChar(60)
-  LineConfiguration LineConfiguration[]
+  id                       Int                        @id @default(autoincrement())
+  name                     String                     @db.VarChar(60)
+  LineConfiguration        LineConfiguration[]
+  lineConfigurationHeaders LineConfigurationHeaders[]
 }
 
 model Theme {
@@ -71,24 +72,24 @@ model Theme {
 }
 
 model LineConfiguration {
-  id                           Int                           @id @default(autoincrement())
+  id                           Int                            @id @default(autoincrement())
   themeId                      Int
   userId                       Int
-  name                         String                        @db.VarChar(60)
+  name                         String                         @db.VarChar(60)
   type                         LineConfigurationType
   viewType                     LineConfigurationViewType
   alternativeEquipmentCode     Boolean
-  timeZone                     String                        @db.VarChar(120)
-  createdAt                    DateTime                      @default(now())
-  isActive                     Boolean                       @default(true)
-  lineConfigurationAdvertising LineConfigurationAdvertising?
-  lineConfigurationImage       LineConfigurationImage[]
+  timeZone                     String                         @db.VarChar(120)
+  createdAt                    DateTime                       @default(now())
+  isActive                     Boolean                        @default(true)
+  lineConfigurationAdvertising LineConfigurationAdvertising[]
+  lineConfigurationHeaders     LineConfigurationHeaders[]
   tournament                   Tournament[]
   sport                        Sport[]
   championship                 Championship[]
   group                        Group[]
-  theme                        Theme                         @relation(fields: [themeId], references: [id])
-  user                         User                          @relation(fields: [userId], references: [id])
+  theme                        Theme                          @relation(fields: [themeId], references: [id])
+  user                         User                           @relation(fields: [userId], references: [id])
 }
 
 enum LineConfigurationType {
@@ -103,16 +104,16 @@ enum LineConfigurationViewType {
 
 model LineConfigurationAdvertising {
   id                  Int               @id @default(autoincrement())
-  lineConfigurationId Int               @unique
+  lineConfigurationId Int
   showEvery           String            @db.VarChar(10)
   path                String            @db.VarChar(120)
   lineConfiguration   LineConfiguration @relation(fields: [lineConfigurationId], references: [id])
 }
 
-model LineConfigurationImage {
+model LineConfigurationHeaders {
   id                  Int               @id @default(autoincrement())
   lineConfigurationId Int
-  name                String            @db.VarChar(10)
   path                String            @db.VarChar(120)
+  tournament          Tournament[]
   lineConfiguration   LineConfiguration @relation(fields: [lineConfigurationId], references: [id])
 }

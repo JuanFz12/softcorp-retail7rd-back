@@ -1,6 +1,7 @@
 import { Request, Response } from "express"
 import { CustomError, ServerResponseEntity } from "../../../shared"
 import { CreateLineConfigurationDto, CreateLineConfigurationUseCase, DeleteLineConfigurationDto, FindLinesConfigurationDto, FindLinesConfigurationUseCase, LinesConfigurationRepository, UpdateLineConfigurationDto } from "../domain"
+import { UploadedFile } from "express-fileupload"
 
 export class LinesConfigurationController {
     constructor(
@@ -30,6 +31,9 @@ export class LinesConfigurationController {
         };
 
         const { user, files, ...restBody } = req.body;
+        const headersImages = this.parseHeadersImages(req);
+        const advertisingImages = this.parseAdvertisingImages(req);
+        console.log(JSON.stringify(restBody))
         const [error, createLineConfigurationDto] = CreateLineConfigurationDto.create({
             ...restBody,
             userId: user.id,
@@ -37,11 +41,8 @@ export class LinesConfigurationController {
             tournamentIds: parseArrayNumbers(restBody.tournamentIds),
             sportIds: parseArrayNumbers(restBody.sportIds),
             championshipIds: parseArrayNumbers(restBody.championshipIds),
-            advertisingImage: files.advertisingImage,
-            images: [
-                { name: 'MLB', file: files.MLB },
-                { name: 'NHL', file: files.NHL }
-            ]
+            advertisingImages: advertisingImages,
+            headersImages: headersImages
         })
         if (error) {
             res.status(400).json(ServerResponseEntity.fromObject({
@@ -58,8 +59,8 @@ export class LinesConfigurationController {
             .catch(error => this.handleError(res, error))
     }
     find = (req: Request, res: Response) => {
-        const { limit = 10, page = 1 } = req.query;
-        const [error, findLinesConfigurationDto] = FindLinesConfigurationDto.create({ limit, page })
+        const { limit = 10, page = 1, name } = req.query;
+        const [error, findLinesConfigurationDto] = FindLinesConfigurationDto.create({ limit, page, name })
         if (error) {
             res.status(400).json(ServerResponseEntity.fromObject({
                 status: 'error',
@@ -74,4 +75,53 @@ export class LinesConfigurationController {
             .then(response => res.json(response))
             .catch(error => this.handleError(res, error))
     }
+    private parseHeadersImages(req: Request): { file: UploadedFile; tournamentId: number }[] {
+        const headers: { file: UploadedFile; tournamentId: number }[] = [];
+
+        const fileKeys = Object.keys(req.files || {}).filter(
+            (key) => key.startsWith('headers[') && key.endsWith('].file')
+        );
+
+        for (const key of fileKeys) {
+            const index = key.match(/headers\[(\d+)\]/)?.[1];
+            if (index === undefined) continue;
+
+            const file = req.files?.[key] as UploadedFile;
+            const tournamentIdRaw = req.body[`headers[${index}].tournamentId`];
+
+            if (file && tournamentIdRaw) {
+                headers.push({
+                    file,
+                    tournamentId: parseInt(tournamentIdRaw, 10),
+                });
+            }
+        }
+
+        return headers;
+    }
+    private parseAdvertisingImages(req: Request): { file: UploadedFile; seconds: string }[] {
+        const headers: { file: UploadedFile; seconds: string }[] = [];
+
+        const fileKeys = Object.keys(req.files || {}).filter(
+            (key) => key.startsWith('advertisements[') && key.endsWith('].file')
+        );
+
+        for (const key of fileKeys) {
+            const index = key.match(/headers\[(\d+)\]/)?.[1];
+            if (index === undefined) continue;
+
+            const file = req.files?.[key] as UploadedFile;
+            const secondsRaw = req.body[`advertisements[${index}].seconds`];
+
+            if (file && secondsRaw) {
+                headers.push({
+                    file,
+                    seconds: secondsRaw,
+                });
+            }
+        }
+
+        return headers;
+    }
+
 }
